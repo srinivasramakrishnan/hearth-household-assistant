@@ -11,9 +11,10 @@ interface UserMenuProps {
     userId: string;
     isAdmin?: boolean;
     onLogout: () => void;
+    minimal?: boolean;
 }
 
-export const UserMenu = ({ userName, userId, isAdmin, onLogout }: UserMenuProps) => {
+export const UserMenu = ({ userName, userId, isAdmin, onLogout, minimal }: UserMenuProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [showAdminApproval, setShowAdminApproval] = useState(false);
     const [showCollaborators, setShowCollaborators] = useState(false);
@@ -61,7 +62,13 @@ export const UserMenu = ({ userName, userId, isAdmin, onLogout }: UserMenuProps)
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-2xl font-bold text-slate-900 flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-                Hi <span className="text-primary">{userName || 'User'}</span>
+                {minimal ? (
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                        {userName?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                ) : (
+                    <>Hi <span className="text-primary">{userName || 'User'}</span></>
+                )}
             </button>
 
             {isOpen && (

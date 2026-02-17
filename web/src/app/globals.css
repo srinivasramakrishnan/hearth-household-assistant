@@ -37,68 +37,79 @@
   --radius-md: 12px;
   /* Small elements */
   --radius-full: 9999px;
-}
 
-:root {
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
-
-  /* --- Material Design 3 Tokens --- */
-
-  /* Primary Brand (Blueish) */
-  --md-sys-color-primary: #2563EB;
-  /* Bright Blue for FAB/Actions */
-  --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-primary-container: #DBEAFE;
-  --md-sys-color-on-primary-container: #1E3A8A;
-
-  /* Backgrounds */
-  --md-sys-color-surface: #F8FAFC;
-  /* Very light cool grey */
-  --md-sys-color-on-surface: #1E293B;
-  /* Slate 800 */
-  --md-sys-color-surface-variant: #F1F5F9;
-  /* Slate 100 */
-  --md-sys-color-on-surface-variant: #475569;
-  /* Slate 600 */
-
-  /* Outlines */
-  --md-sys-color-outline: #CBD5E1;
-  --md-sys-color-outline-variant: #E2E8F0;
-
-  /* --- Pastel Palette (From Designs) --- */
-
-  /* Soft Blue/Purple (Today, Educational) */
-  --color-pastel-blue: #C7D2FE;
-  /* Indigo 200-ish */
-  --color-on-pastel-blue: #312E81;
-  /* Indigo 900 */
-
-  /* Soft Yellow (Scheduled, Home) */
-  --color-pastel-yellow: #FEF08A;
-  /* Yellow 200 */
-  --color-on-pastel-yellow: #854D0E;
-  /* Yellow 900 */
-
-  /* Soft Green (All, Work) */
-  --color-pastel-green: #A7F3D0;
-  /* Emerald 200 */
-  --color-on-pastel-green: #064E3B;
-  /* Emerald 900 */
-
-  /* Soft Pink (Overdue, Personal) */
-  --color-pastel-pink: #FBCFE8;
-  /* Pink 200 */
-  --color-on-pastel-pink: #831843;
-  /* Pink 900 */
+  /* Shadcn Colors */
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 }
 
 /* Base resets */
 body {
-  background-color: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
   font-family: var(--font-family);
   @apply antialiased;
   -webkit-tap-highlight-color: transparent;
+
+  /* Sam Background Texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+:root {
+  /* Fonts */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Newsreader', serif;
+
+  /* Sam Palette */
+  --bg-paper: #E8E2D6;
+  --bg-card: #F2EFE8;
+  --text-primary: #3A3630;
+  --text-secondary: #787268;
+  --text-tertiary: #A6A095;
+  --accent-olive: #2F3826;
+  --accent-sage: #8A9A85;
+  --accent-slate: #6B7C85;
+
+  /* Status Colors */
+  --status-stock-bg: #D4DBD0;
+  --status-stock-text: #2F3826;
+  --status-low-bg: #E6DBC4;
+  --status-low-text: #6B5B30;
+  --status-out-bg: #E6D4D4;
+  --status-out-text: #7A3E3E;
+
+  /* Spacing & Radius */
+  --radius-lg: 24px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 4px 24px -4px rgba(58, 54, 48, 0.08);
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+
+  /* Mapping to Existing Tokens (Overrides) */
+  --md-sys-color-surface: var(--bg-paper);
+  --md-sys-color-on-surface: var(--text-primary);
+  --md-sys-color-primary: var(--accent-olive);
+  --md-sys-color-on-primary: #FFFFFF;
+
+  /* Shadcn / Radix Variables */
+  --popover: #FFFFFF;
+  --popover-foreground: var(--text-primary);
+  --muted: #F3F4F6;
+  --muted-foreground: var(--text-secondary);
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: var(--accent-olive);
+  --background: #FFFFFF;
+  --foreground: var(--text-primary);
 }
 
 /* Utilities */

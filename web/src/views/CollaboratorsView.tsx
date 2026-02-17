@@ -1,7 +1,8 @@
-import { X, Trash2, Users } from 'lucide-react';
-import { collection, query, where, deleteDoc, doc } from 'firebase/firestore';
+import { X, Trash2, Users, UserPlus, Check } from 'lucide-react';
+import { collection, query, where, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { useCollection } from 'react-firebase-hooks/firestore';
 import { db } from '../lib/firebase';
+import { useState } from 'react';
 
 interface CollaboratorsViewProps {
     userId: string;
@@ -13,6 +14,29 @@ export const CollaboratorsView = ({ userId, onClose }: CollaboratorsViewProps) =
     const [collaborationsSnapshot, loading, error] = useCollection(
         query(collection(db, 'collaborations'), where('inviterId', '==', userId))
     );
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [isInviting, setIsInviting] = useState(false);
+
+    const handleInviteSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!inviteEmail) return;
+
+        try {
+            const collabId = `${userId}_${inviteEmail.trim()}`;
+            await setDoc(doc(db, 'collaborations', collabId), {
+                inviterId: userId,
+                inviteeEmail: inviteEmail.trim(),
+                createdAt: Date.now()
+            });
+
+            setInviteEmail('');
+            setIsInviting(false);
+            // Optional: Show success toast
+        } catch (error: any) {
+            console.error('Error sending invite:', error);
+            alert('Failed to send invite: ' + error.message);
+        }
+    };
 
     const handleRemoveCollaborator = async (collabId: string) => {
         if (!confirm('Are you sure you want to remove this collaborator? They will lose access to your lists.')) return;
@@ -39,6 +63,48 @@ export const CollaboratorsView = ({ userId, onClose }: CollaboratorsViewProps) =
                     >
                         <X size={20} />
                     </button>
+                </div>
+
+                {/* Invite Section */}
+                <div className="px-6 pt-4 pb-0">
+                    {!isInviting ? (
+                        <button
+                            onClick={() => setIsInviting(true)}
+                            className="w-full py-3 rounded-lg border border-dashed border-slate-300 hover:border-indigo-300 hover:bg-indigo-50/30 flex items-center justify-center gap-2 transition-colors text-slate-500 font-medium"
+                        >
+                            <UserPlus size={18} />
+                            Invite New Collaborator
+                        </button>
+                    ) : (
+                        <form onSubmit={handleInviteSubmit} className="flex gap-2 items-center">
+                            <div className="relative flex-1">
+                                <UserPlus size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <input
+                                    type="email"
+                                    autoFocus
+                                    required
+                                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                    placeholder="Enter email address"
+                                    value={inviteEmail}
+                                    onChange={(e) => setInviteEmail(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={!inviteEmail}
+                                className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <Check size={20} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsInviting(false)}
+                                className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </form>
+                    )}
                 </div>
 
                 {/* Content */}

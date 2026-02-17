@@ -1,17 +1,15 @@
 const twilio = require("twilio");
 const logger = require("firebase-functions/logger");
+const { getOrCreateUserByPhone } = require("./user");
 
-// TODO: Store these in a config or constants file, or specific users
-const USERS = {
-    "whatsapp:+14156919214": "Srinivas", // User Provided
-    "whatsapp:+14154305669": "Lakshmi" // User Provided
-};
-
-// Reverse map for broadcasting
-const USER_NUMBERS = Object.keys(USERS);
-
-function getSenderName(fromNumber) {
-    return USERS[fromNumber] || "Family Member";
+async function getSenderName(fromNumber) {
+    try {
+        const user = await getOrCreateUserByPhone(fromNumber);
+        return user.displayName || "Family Member";
+    } catch (error) {
+        logger.error(`Error getting sender name for ${fromNumber}:`, error);
+        return "Family Member";
+    }
 }
 
 async function sendWhatsApp(accountSid, authToken, to, body) {
@@ -22,6 +20,17 @@ async function sendWhatsApp(accountSid, authToken, to, body) {
             to: to,
             body: body
         });
+
+        // Store outgoing message
+        const admin = require("firebase-admin");
+        const db = admin.firestore();
+        await db.collection("messages").add({
+            userId: to,
+            text: body,
+            direction: "out",
+            timestamp: Date.now()
+        });
+
         logger.info(`Message sent to ${to}`);
     } catch (error) {
         logger.error(`Error sending WhatsApp to ${to}:`, error);
@@ -29,9 +38,20 @@ async function sendWhatsApp(accountSid, authToken, to, body) {
 }
 
 async function broadcastUpdate(accountSid, authToken, senderNumber, action) {
-    // Determine who to notify (everyone except sender)
-    const targets = USER_NUMBERS.filter((num) => num !== senderNumber);
-    const senderName = getSenderName(senderNumber);
+    // Get all users to determine who to notify
+    const admin = require("firebase-admin");
+    const db = admin.firestore();
+
+    const snapshot = await db.collection("users").get();
+    const targets = [];
+    snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.phoneNumber && data.phoneNumber !== senderNumber) {
+            targets.push(data.phoneNumber);
+        }
+    });
+
+    const senderName = await getSenderName(senderNumber);
 
     let message = "";
     if (action.type === "addEvent") {

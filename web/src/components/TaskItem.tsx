@@ -1,59 +1,66 @@
-import { Trash2, GripVertical, Check } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Check, Calendar } from 'lucide-react';
+import { clsx } from 'clsx';
+import { ListItem } from '../types';
 
 interface TaskItemProps {
-    id: string;
-    title: string;
-    completed: boolean;
-    timestamp?: string;
-    onToggle: () => void;
-    onDelete: () => void;
+    item: ListItem;
+    onToggle: (item: ListItem) => void;
+    onDelete?: (item: ListItem) => void;
+    listName?: string; // Optional context
 }
 
-export const TaskItem = ({ id, title, completed, timestamp, onToggle, onDelete }: TaskItemProps) => {
+export const TaskItem = ({ item, onToggle, onDelete, listName }: TaskItemProps) => {
+    // TickTick Style:
+    // Left: Checkbox (Priority Color) - Circular for tasks
+    // Middle: Content
+    // Right: Metadata (Date, Tags, List Name) within the row or on hover actions
+
     return (
-        <motion.div
-            layoutId={id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="group relative bg-white rounded-[var(--radius-lg)] p-4 mb-3 flex items-start space-x-4 material-shadow-1 hover:shadow-md transition-shadow"
-        >
-            {/* Custom Radio/Checkbox */}
+        <div className="group flex items-center gap-3 p-3 bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+            {/* Checkbox / Priority */}
             <button
-                onClick={onToggle}
-                className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${completed
-                        ? 'bg-primary border-primary text-white'
-                        : 'border-slate-300 hover:border-primary'
-                    }`}
+                onClick={() => onToggle(item)}
+                className={clsx(
+                    "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                    item.isBought
+                        ? "bg-indigo-500 border-indigo-500 text-white"
+                        : "border-slate-300 hover:border-indigo-500 text-transparent hover:text-indigo-500"
+                )}
             >
-                {completed && <Check size={14} strokeWidth={3} />}
+                <Check size={12} strokeWidth={3} />
             </button>
 
+            {/* Content */}
             <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                        {timestamp && (
-                            <div className="flex items-center space-x-2 text-xs text-slate-400 mb-1">
-                                <span>{timestamp}</span>
-                            </div>
-                        )}
-                        <h4 className={`text-base font-medium leading-relaxed transition-all ${completed ? 'text-slate-400 line-through decoration-2 decoration-slate-200' : 'text-slate-800'
-                            }`}>
-                            {title}
-                        </h4>
-                    </div>
+                <p className={clsx(
+                    "text-sm font-medium truncate",
+                    item.isBought ? "text-slate-400 line-through" : "text-slate-800"
+                )}>
+                    {item.name}
+                </p>
+                {/* Subtitle / Metadata Row */}
+                <div className="flex items-center gap-2 mt-0.5">
+                    {listName && (
+                        <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                            {listName}
+                        </span>
+                    )}
+                    {item.quantity && item.quantity > 1 && (
+                        <span className="text-xs text-slate-500">
+                            Qty: {item.quantity} {item.unit}
+                        </span>
+                    )}
                 </div>
             </div>
 
-            {/* Actions */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-4 top-4 flex items-center bg-white pl-2">
-                <button
-                    onClick={onDelete}
-                    className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                >
-                    <Trash2 size={18} />
-                </button>
+            {/* Actions / Date (Right Side) */}
+            {/* For now just showing date or nothing. Hover actions could go here. */}
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Placeholder for future date picker */}
+                {/* <button className="p-1.5 text-slate-400 hover:text-indigo-600 rounded">
+                    <Calendar size={16} />
+                 </button> */}
             </div>
-        </motion.div>
+        </div>
     );
 };

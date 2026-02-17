@@ -16,8 +16,6 @@ const twilioAccountSid = defineSecret("TWILIO_ACCOUNT_SID");
 const twilioAuthToken = defineSecret("TWILIO_AUTH_TOKEN");
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
-// Import Tools
-const scheduleTools = require("./tools/schedule");
 // Import Triggers
 const inventoryTriggers = require("./triggers/inventoryTriggers");
 

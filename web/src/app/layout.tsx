@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "../context/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Pantry2List: Manage your Shopping list and Pantry",
-    description: "Smart grocery list and pantry manager",
+    title: "Sam: Your AI Household Assistant",
+    description: "Smart grocery list, pantry manager, and household organizer powered by AI.",
 };
 
 export default function RootLayout({
@@ -14,7 +15,11 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body suppressHydrationWarning>
-                {children}
+                <AuthProvider>
+                    <main>
+                        {children}
+                    </main>
+                </AuthProvider>
             </body>
         </html>
     );

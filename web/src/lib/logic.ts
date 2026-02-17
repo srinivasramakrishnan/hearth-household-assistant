@@ -99,3 +99,108 @@ export const depleteItemFromPantry = async (userId: string, item: PantryItem, ad
         throw error;
     }
 };
+
+export const undoMoveToPantry = async (userId: string, item: ListItem) => {
+    try {
+        // 1. Mark as NOT bought in the list
+        const itemRef = doc(db, 'items', item.id);
+        await updateDoc(itemRef, { isBought: false });
+
+        // 2. Remove from pantry (decrement/delete)
+        const pantryRef = collection(db, 'pantry');
+        const q = query(
+            pantryRef,
+            where('userId', '==', userId),
+            where('sourceListId', '==', item.listId),
+            where('name', '==', item.name)
+        );
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            const existingItem = snapshot.docs[0];
+            const currentQty = existingItem.data().quantity || 1;
+
+            if (currentQty > 1) {
+                await updateDoc(existingItem.ref, {
+                    quantity: increment(-(item.quantity || 1)),
+                    lastUpdated: Date.now()
+                });
+            } else {
+                await deleteDoc(existingItem.ref);
+            }
+        }
+    } catch (error) {
+        console.error("Error undoing move to pantry:", error);
+        throw error;
+    }
+};
+
+export const incrementPantryItem = async (item: PantryItem) => {
+    try {
+        const itemRef = doc(db, 'pantry', item.id);
+        await updateDoc(itemRef, {
+            quantity: increment(1),
+            lastUpdated: Date.now()
+        });
+    } catch (error) {
+        console.error("Error incrementing pantry item:", error);
+        throw error;
+    }
+};
+
+// --- CRUD Operations ---
+
+export const updateShoppingItemQuantity = async (itemId: string, delta: number) => {
+    try {
+        const itemRef = doc(db, 'items', itemId);
+        await updateDoc(itemRef, {
+            quantity: increment(delta),
+            lastUpdated: Date.now()
+        });
+    } catch (error) {
+        console.error("Error updating shopping item quantity:", error);
+        throw error;
+    }
+};
+
+export const deleteShoppingItem = async (itemId: string) => {
+    try {
+        await deleteDoc(doc(db, 'items', itemId));
+    } catch (error) {
+        console.error("Error deleting shopping item:", error);
+        throw error;
+    }
+};
+
+export const deletePantryItem = async (itemId: string) => {
+    try {
+        await deleteDoc(doc(db, 'pantry', itemId));
+    } catch (error) {
+        console.error("Error deleting pantry item:", error);
+        throw error;
+    }
+};
+
+export const updateShoppingItem = async (itemId: string, data: Partial<ListItem>) => {
+    try {
+        await updateDoc(doc(db, 'items', itemId), {
+            ...data,
+            lastUpdated: Date.now()
+        });
+    } catch (error) {
+        console.error("Error updating shopping item:", error);
+        throw error;
+    }
+};
+
+export const updatePantryItem = async (itemId: string, data: Partial<PantryItem>) => {
+    try {
+        await updateDoc(doc(db, 'pantry', itemId), {
+            ...data,
+            lastUpdated: Date.now()
+        });
+    } catch (error) {
+        console.error("Error updating pantry item:", error);
+        throw error;
+    }
+};

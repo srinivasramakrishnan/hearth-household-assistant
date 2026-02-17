@@ -1,12 +1,16 @@
+export interface UserPreferences {
+    autoAddBackToShoppingList: boolean;
+}
+
 export interface UserProfile {
     uid: string;
     email: string | null;
     displayName: string | null;
-    role?: 'admin' | 'user';
-    isApproved?: boolean;
-    preferences: {
-        autoAddBackToShoppingList: boolean;
-    };
+    phoneNumber?: string;
+    photoURL?: string | null;
+    role: 'admin' | 'user';
+    isApproved: boolean;
+    preferences?: UserPreferences;
 }
 
 export interface ShoppingList {

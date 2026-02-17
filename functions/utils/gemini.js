@@ -10,7 +10,6 @@ const tools = {
     getSchedule: scheduleTools.getSchedule,
     updatePantryItem: inventoryTools.updatePantryItem,
     addToShoppingList: inventoryTools.addToShoppingList
-    // TODO: Add querying pantry/shopping list if needed
 };
 
 // Define tool schemas for Gemini
@@ -45,11 +44,12 @@ const toolDefinitions = [
             },
             {
                 name: "addToShoppingList",
-                description: "Add an item manually to the shopping list.",
+                description: "Add an item manually to the shopping list. If the user specifies a list name (e.g. 'add milk to groceries'), include it.",
                 parameters: {
                     type: "OBJECT",
                     properties: {
-                        item: { type: "STRING", description: "Name of the item" }
+                        item: { type: "STRING", description: "Name of the item" },
+                        listName: { type: "STRING", description: "Optional name of the specific list to add to" }
                     },
                     required: ["item"]
                 }
@@ -86,10 +86,37 @@ async function processWithGemini(apiKey, userMessage, userId) {
 
                 let toolResult;
                 if (tools[functionName]) {
-                    // Inject createdBy for schedule
-                    if (functionName === "addEvent") args.createdBy = userId;
+                    // Explicitly call tools with correct arguments including userId/phoneNumber
+                    if (functionName === "addEvent") {
+                        // addEvent(title, date, type, recurrenceRule, createdBy)
+                        toolResult = await tools.addEvent(
+                            args.title,
+                            args.date,
+                            args.type || "one-time",
+                            args.recurrenceRule || null,
+                            userId // createdBy
+                        );
+                    } else if (functionName === "updatePantryItem") {
+                        // updatePantryItem(item, status, phoneNumber)
+                        toolResult = await tools.updatePantryItem(
+                            args.item,
+                            args.status,
+                            userId // phoneNumber
+                        );
+                        // addToShoppingList(item, listName, phoneNumber)
+                        toolResult = await tools.addToShoppingList(
+                            args.item,
+                            args.listName || null,
+                            userId // phoneNumber
+                        );
+                    } else if (functionName === "getSchedule") {
+                        // getSchedule(startDate, endDate) - NOT YET EXPOSED TO GEMINI TOOLS above
+                        // If we add it later, we need to handle args here.
+                        toolResult = { error: "Function not suitable for direct call yet." };
+                    } else {
+                        toolResult = { error: "Function not matched in dispatcher." };
+                    }
 
-                    toolResult = await tools[functionName](...Object.values(args));
                     actionTaken = { type: functionName, args: args, result: toolResult };
                 } else {
                     toolResult = { error: "Function not found" };
@@ -106,7 +133,6 @@ async function processWithGemini(apiKey, userMessage, userId) {
                 ];
 
                 // For simplicity in this v1, we assume one turn of function calling.
-                // Proper loop needed for multi-turn resource.
                 const finalResult = await chat.sendMessage(resultPart);
                 finalResponseText = finalResult.response.text();
             }

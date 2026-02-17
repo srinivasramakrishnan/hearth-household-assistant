@@ -1,4 +1,3 @@
-const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
 const logger = require("firebase-functions/logger");
 const { processWithGemini } = require("./gemini");
@@ -63,6 +62,14 @@ async function handleIncomingMessage(userId, text, secrets) {
     // Consolidate messages
     const fullText = data.messages.join("\n");
 
+    // Store the consolidated message in history
+    const messageRef = await db.collection("messages").add({
+        userId: userId,
+        text: fullText,
+        direction: "in",
+        timestamp: Date.now()
+    });
+
     // Clear buffer IMMEDIATELY to prevent double processing
     // We use a transaction to ensure we only clear if we are the robust winner,
     // but simplified: just clear messages.
@@ -74,6 +81,11 @@ async function handleIncomingMessage(userId, text, secrets) {
     const authToken = secrets.twilioAuthToken.value();
 
     const result = await processWithGemini(apiKey, fullText, userId);
+
+    // Update message with action taken if any
+    if (result.actionTaken) {
+        await messageRef.update({ actionTaken: result.actionTaken });
+    }
 
     // Send Validated Response
     await sendWhatsApp(accountSid, authToken, userId, result.text);

@@ -1,6 +1,5 @@
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const logger = require("firebase-functions/logger");
-const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
 
 const db = getFirestore();

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import type { PantryItem } from '../types';
-import { Box, Minus, Plus, RefreshCcw } from 'lucide-react';
+import { Box, Minus, Plus, RefreshCcw, Check } from 'lucide-react';
 import { depleteItemFromPantry } from '../lib/logic';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -39,9 +39,10 @@ export const PantryView = ({ userId }: PantryViewProps) => {
         }
     };
 
-    const confirmDeplete = async (addBack: boolean) => {
-        if (showPrompt) {
-            await depleteItemFromPantry(userId, showPrompt.item, addBack);
+    const confirmDeplete = async (addBack: boolean, specificItem?: PantryItem) => {
+        const itemToProcess = specificItem || showPrompt?.item;
+        if (itemToProcess) {
+            await depleteItemFromPantry(userId, itemToProcess, addBack);
             setShowPrompt(null);
         }
     };
@@ -55,27 +56,40 @@ export const PantryView = ({ userId }: PantryViewProps) => {
             <div className="p-4 space-y-8">
                 {Object.entries(groupedItems).map(([group, groupItems]) => (
                     <div key={group}>
-                        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">{group}</h2>
-                        <div className="grid grid-cols-1 gap-3">
+                        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">{group}</h2>
+                        <div className="space-y-2">
                             {groupItems.map(item => (
-                                <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center justify-between">
-                                    <div>
-                                        <h3 className="font-semibold text-slate-800">{item.name}</h3>
-                                        <p className="text-sm text-slate-500">{item.quantity} {item.unit || 'units'}</p>
+                                <div key={item.id} className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3">
+                                    {/* Restock Button (Uncheck) */}
+                                    <button
+                                        onClick={() => confirmDeplete(true, item)}
+                                        className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-indigo-600 flex items-center justify-center text-white hover:bg-transparent hover:text-transparent transition-all group"
+                                        title="Restock (Move to List)"
+                                    >
+                                        <div className="opacity-100 group-hover:opacity-0 transition-opacity">
+                                            <Check size={14} />
+                                        </div>
+                                    </button>
+
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold text-slate-800 line-through decoration-slate-300 decoration-2">{item.name}</h3>
+                                        <p className="text-xs text-slate-400">{item.quantity} {item.unit || 'units'}</p>
                                     </div>
-                                    <div className="flex items-center space-x-2">
+
+                                    {/* Qty Controls */}
+                                    <div className="flex items-center bg-slate-50 rounded-lg p-1">
                                         <button
                                             onClick={() => handleDeplete(item)}
-                                            className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                            className="w-7 h-7 flex items-center justify-center text-slate-500 hover:bg-white hover:shadow-sm rounded-md transition-all"
                                         >
-                                            <Minus size={20} />
+                                            <Minus size={14} />
                                         </button>
-                                        <span className="w-8 text-center font-bold text-indigo-600">{item.quantity}</span>
+                                        <span className="w-8 text-center font-bold text-indigo-600 text-sm">{item.quantity}</span>
                                         <button
-                                            onClick={() => {/* Increment logic optionally */ }}
-                                            className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-green-50 hover:text-green-600 transition-colors"
+                                            onClick={() => {/* Implement increment later if needed, or simple update */ }}
+                                            className="w-7 h-7 flex items-center justify-center text-slate-500 hover:bg-white hover:shadow-sm rounded-md transition-all opacity-50 cursor-not-allowed"
                                         >
-                                            <Plus size={20} />
+                                            <Plus size={14} />
                                         </button>
                                     </div>
                                 </div>

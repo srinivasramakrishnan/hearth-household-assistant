@@ -1,3 +1,0 @@
-module.exports=[27572,a=>{"use strict";var b=a.i(7997);function c({children:a}){return(0,b.jsx)("html",{lang:"en",suppressHydrationWarning:!0,children:(0,b.jsx)("body",{suppressHydrationWarning:!0,children:a})})}a.s(["default",()=>c,"metadata",0,{title:"Pantry2List: Manage your Shopping list and Pantry",description:"Smart grocery list and pantry manager"}])}];
-
-//# sourceMappingURL=src_app_layout_tsx_cc8184fa._.js.map

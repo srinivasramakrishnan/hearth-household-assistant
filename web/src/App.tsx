@@ -1,21 +1,23 @@
-"use client";
 import { useState, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from './lib/firebase';
-import { DashboardView } from './views/DashboardView';
-import { AllListsView } from './views/AllListsView';
 import { LandingView } from './views/LandingView';
+import { PantryView } from './views/PantryView';
 import { WaitApprovalView } from './views/WaitApprovalView';
 import { HelpView } from './views/HelpView';
+import { CalendarView } from './views/CalendarView';
+import { Layout } from './components/Layout';
+import { SamDashboard } from './views/SamDashboard';
+import { TaskListView } from './components/TaskListView';
 import { Loader2, LogOut } from 'lucide-react';
-import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { UserProfile } from './types';
 
 function App() {
   const [user, loading, error] = useAuthState(auth);
   const [appUser, setAppUser] = useState<UserProfile | null>(null);
   const [isAppUserLoading, setIsAppUserLoading] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'all-lists' | 'help'>('all-lists');
+  const [currentView, setCurrentView] = useState<string>('today');
   const [timedOut, setTimedOut] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -101,38 +103,26 @@ function App() {
   }
 
   if (!user) {
-    return <LandingView onLoginSuccess={() => setCurrentView('all-lists')} />;
+    return <LandingView onLoginSuccess={() => setCurrentView('today')} />;
   }
 
   // Check approval status
   if (appUser && !appUser.isApproved) {
-    return <WaitApprovalView onLogout={() => auth.signOut()} email={user.email} />;
+    return <WaitApprovalView onLogout={() => auth.signOut()} email={user?.email || ''} />;
+  }
+
+  if (currentView === 'landing') {
+    return (
+      <LandingView
+        onLoginSuccess={() => setCurrentView('today')}
+        isLoggedIn={true}
+        onGoToDashboard={() => setCurrentView('today')}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen bg-surface font-sans text-on-surface selection:bg-primary selection:text-white">
-      {currentView === 'dashboard' && (
-        <DashboardView
-          userName={user.displayName}
-          onNavigateToLists={() => setCurrentView('all-lists')}
-        />
-      )}
-      {currentView === 'all-lists' && (
-        <AllListsView
-          userId={user.uid}
-          userName={user.displayName}
-          userEmail={user.email}
-          isAdmin={appUser?.role === 'admin'}
-          onLogout={() => auth.signOut()}
-          onBack={() => setCurrentView('dashboard')}
-          onNavigateToHelp={() => setCurrentView('help')}
-        />
-      )}
-      {currentView === 'help' && (
-        <HelpView onBack={() => setCurrentView('all-lists')} />
-      )}
-    </div>
+    <SamDashboard />
   );
 }
-
 export default App;
