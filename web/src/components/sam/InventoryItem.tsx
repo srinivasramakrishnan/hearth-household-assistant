@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Check, Plus, Minus, MoreVertical, Trash2, Pencil } from 'lucide-react';
+import React from 'react';
+import { Check, Plus, Minus, Trash2, Pencil } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface InventoryItemProps {
     name: string;
@@ -35,20 +36,6 @@ export const InventoryItem = ({
     onEdit,
     onDelete
 }: InventoryItemProps) => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
-
-    // Close menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setIsMenuOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
     // Determine effective showQuantity (backwards compatibility for 'quantity' variant)
     const shouldShowQuantity = showQuantity || variant === 'quantity';
 
@@ -113,38 +100,30 @@ export const InventoryItem = ({
                 </div>
             )}
 
-            {/* More / Menu Options */}
+            {/* Inline Actions */}
             {(onEdit || onDelete) && (
-                <div className="relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="w-6 h-6 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] rounded-full hover:bg-slate-100 transition-colors"
-                    >
-                        <MoreVertical size={14} />
-                    </button>
-
-                    {/* Popover Menu */}
-                    {isMenuOpen && (
-                        <div className="absolute right-0 top-full mt-1 w-32 bg-white rounded-lg shadow-xl border border-slate-100 py-1 z-10 origin-top-right animate-in fade-in zoom-in-95 duration-100">
-                            {onEdit && (
-                                <button
-                                    onClick={() => { setIsMenuOpen(false); onEdit(); }}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-[var(--text-primary)] hover:bg-slate-50 transition-colors text-left"
-                                >
-                                    <Pencil size={12} className="text-[var(--text-secondary)]" />
-                                    Edit
-                                </button>
-                            )}
-                            {onDelete && (
-                                <button
-                                    onClick={() => { setIsMenuOpen(false); onDelete(); }}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-red-600 hover:bg-red-50 transition-colors text-left"
-                                >
-                                    <Trash2 size={12} />
-                                    Delete
-                                </button>
-                            )}
-                        </div>
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    {onEdit && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onEdit}
+                            className="w-8 h-8 rounded-full text-slate-400 hover:text-[var(--accent-olive)] hover:bg-slate-50"
+                            title="Edit"
+                        >
+                            <Pencil size={14} />
+                        </Button>
+                    )}
+                    {onDelete && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onDelete}
+                            className="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50"
+                            title="Delete"
+                        >
+                            <Trash2 size={14} />
+                        </Button>
                     )}
                 </div>
             )}
