@@ -76,7 +76,7 @@ async function addToShoppingList(item, listName, phoneNumber) {
         // Smart Classification Logic
         if (!targetListName) {
             // Check classification logs
-            const logId = `${userId}_${normalizedItem.replace(/\s+/g, '_')}`;
+            const logId = `${userId}_${normalizedItem.replace(/\s+/g, "_")}`;
             const logDoc = await db.collection("classification_logs").doc(logId).get();
 
             if (logDoc.exists) {
@@ -126,7 +126,7 @@ async function addToShoppingList(item, listName, phoneNumber) {
         // Update Classification Log (Learn preference)
         // We do this every time an item is added to a specific list
         if (userId !== "system") {
-            const logId = `${userId}_${normalizedItem.replace(/\s+/g, '_')}`;
+            const logId = `${userId}_${normalizedItem.replace(/\s+/g, "_")}`;
             await db.collection("classification_logs").doc(logId).set({
                 userId,
                 itemName: normalizedItem,

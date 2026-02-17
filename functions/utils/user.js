@@ -18,8 +18,8 @@ async function getOrCreateUserByPhone(phoneNumber, defaultName = "New User") {
 
         if (!snapshot.empty) {
             // Prioritize user with a UID (web user) over ghost users
-            const users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-            const linkedUser = users.find(u => u.uid);
+            const users = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+            const linkedUser = users.find((u) => u.uid);
 
             if (linkedUser) {
                 return linkedUser;
@@ -34,7 +34,7 @@ async function getOrCreateUserByPhone(phoneNumber, defaultName = "New User") {
         if (!collabsSnapshot.empty) {
             const collab = collabsSnapshot.docs[0].data();
 
-            // If found, return the INVITER'S ID as the acting user context, 
+            // If found, return the INVITER'S ID as the acting user context,
             // but with the collaborator's identifier for display if possible.
             // We fetch the Inviter to ensure we have valid user context for database operations.
             const inviterSnapshot = await db.collection(USERS_COLLECTION).doc(collab.inviterId).get();
@@ -53,7 +53,7 @@ async function getOrCreateUserByPhone(phoneNumber, defaultName = "New User") {
 
         if (!snapshot.empty) {
             // If no linked user and no collaborator, return the first found user (likely a ghost user)
-            const users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            const users = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
             return users[0];
         }
 
